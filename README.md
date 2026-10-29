@@ -7,17 +7,17 @@ A Flipper Zero app that **pretends to be an NFC tag and logs every command (APDU
 > ISO14443-4A / ISO-DEP card emulation + APDU logger, for debugging your **own** NFC devices.
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="24%" alt="Start menu">
-  <img src="docs/screenshots/scan.png" width="24%" alt="Scan a tag">
-  <img src="docs/screenshots/spying.png" width="24%" alt="Logging APDUs">
-  <img src="docs/screenshots/success.png" width="24%" alt="Success">
+  <img src="docs/screens.png" width="300" alt="Start screen, spying/waiting, scan, success">
 </p>
 
 ## Why I built this
 
-I have a **Good Display DMN036EW** e-ink badge (Spectra 6) that I wanted to bring back to life and drive myself. To do that I needed to understand **how the badge talks to the phone app** — which commands the app sends and how the badge answers each one.
+I have a e-ink badge (Spectra 6) that I wanted to bring back to life. To do that I needed to understand how the badge talks to the phone app — which commands the app sends and how the badge answers each one.
 
-There was no easy way to see that on the Flipper. So I built this: the Flipper impersonates the badge, I hold the phone to it, and the app writes down the full command/response exchange. From that log I can rebuild the badge's "answer table" and talk to it on my own terms. It turned out useful for any ISO14443-4A tag, not just my badge, so here it is.
+So I built this app:
+The Flipper scans and impersonates a tag, and when the Flipper gets near the phone the app writes down the full command/response exchange. From that log you can rebuild the tag's "answer table".
+
+It turned out useful for any ISO14443-4A tag, not just my badge, so I polished it a little bit and here it is :).
 
 Crucially, the spy records **both directions** — the commands the phone sends *and* the responses the emulated ("fake") Flipper tag gives back. That two-sided capture is exactly what I needed to author a new profile for my e-ink display: I had to know what the phone tells the badge, how the badge should react, and which responses the phone app accepts versus silently ignores. By tweaking the Flipper's answers and watching which ones keep the conversation alive, you can reverse-engineer a working profile step by step.
 
@@ -39,14 +39,6 @@ The app ships with a normal crisp **1-bit** interface (the default). It also has
   <img src="docs/screenshots/settings.png" width="32%" alt="Settings">
 </p>
 
-## Screens
-
-A typical run — start, waiting for the reader, scanning a tag, and a successful result:
-
-<p align="center">
-  <img src="docs/screens.png" width="300" alt="Walkthrough: start screen, spying/waiting, scan, success">
-</p>
-
 ## How to use
 
 1. **Select** a tag from the list, or **Scan** a new real tag.
@@ -54,16 +46,11 @@ A typical run — start, waiting for the reader, scanning a tag, and a successfu
 3. It logs every command the sender sends and the reply.
 4. On exit, **save the log** to review it.
 
-Controls while spying: `Left/Right` or long `OK` toggle the graphics mode, `Back` stops (and offers to save the log). In the tag list, a **long press of OK** opens a small **Rename / Delete** menu.
+**Controls**
 
-## Install
-
-This is a standard external Flipper app (FAP).
-
-- Build with [`ufbt`](https://github.com/flipperdevices/flipperzero-ufbt): drop the folder into your apps and run `ufbt launch`, or
-- Copy a prebuilt `nfc_apdu_spy.fap` to `apps/NFC/` on your Flipper's SD card.
-
-Tested on firmware with the Momentum SDK; it uses only standard NFC, GUI, storage and notification APIs.
+- `Left` / `Right` or long **OK** — toggle the graphics mode (1-bit ↔ Gray)
+- `Back` — stop spying (and offer to save the log)
+- Long **OK** in the tag list — open the small **Rename / Delete** menu
 
 ## Tag profile format
 
@@ -94,14 +81,3 @@ This tool emulates contactless cards and records the data exchanged with a reade
 ## Credits
 
 App by **Menrix** (alias **Don_Key_Moustache**).
-
-## GitHub topics
-
-Add these as repository **topics** so people can find it:
-
-```
-flipper-zero  flipperzero  flipper-zero-app  fap  flipper-application
-nfc  iso14443  iso14443-4  iso-dep  apdu  rfid  smartcard
-card-emulation  nfc-tag  reverse-engineering  security-tools
-eink  e-paper  spectra6  good-display  embedded  c
-```
