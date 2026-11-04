@@ -1,0 +1,59 @@
+name: Build FAP
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Official
+            args: "--channel=release"
+          - name: Momentum
+            args: "--index-url=https://up.momentum-fw.dev/firmware/directory.json"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install ufbt
+        run: pip install ufbt
+
+      - name: Get the firmware SDK
+        run: ufbt update ${{ matrix.args }}
+
+      - name: Build the .fap
+        run: ufbt
+
+      - name: Version label
+        id: ver
+        run: echo "tag=${{ github.event_name == 'release' && github.ref_name || 'dev' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Rename
+        run: |
+          mkdir -p out
+          cp dist/*.fap "out/NFC_Apdu_Spy-${{ steps.ver.outputs.tag }}-${{ matrix.name }}.fap"
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NFC_Apdu_Spy-${{ matrix.name }}
+          path: out/*.fap
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.fap
