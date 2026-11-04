@@ -522,18 +522,24 @@ static void spy_log(
     if(furi_message_queue_put(app->log_queue, it, 0) != FuriStatusOk) app->dropped++;
 }
 
+// Send the current app->tx as a standard ISO14443-A frame, portably.
+// This mirrors what the Momentum-only iso14443_3a_listener_send_standard_frame()
+// did internally (append CRC-A, then transmit) but uses only the public API that
+// official firmware also exports: iso14443_crc_append() + nfc_listener_tx().
+static void spy_tx(NfcApduSpy* app) {
+    iso14443_crc_append(Iso14443CrcTypeA, app->tx);
+    nfc_listener_tx(app->nfc, app->tx);
+}
+
 static void spy_send(NfcApduSpy* app, Iso14443_3aListener* l, const uint8_t* frame, size_t len) {
+    UNUSED(l);
     bit_buffer_reset(app->tx);
     bit_buffer_append_bytes(app->tx, frame, len);
     if(len <= sizeof(app->last_frame)) {
         memcpy(app->last_frame, frame, len);
         app->last_frame_len = (uint8_t)len;
     }
-    // send a standard frame portably (works on official + Momentum):
-    // append CRC-A, then transmit raw — exactly what the Momentum-only helper
-    // iso14443_3a_listener_send_standard_frame() did internally.
-    iso14443_crc_append(Iso14443CrcTypeA, app->tx);
-    iso14443_3a_listener_tx(l, app->tx);
+    spy_tx(app);
 }
 
 // ---------- ISO-DEP by hand (card side) ----------
@@ -633,7 +639,7 @@ static NfcCommand spy_nfc_callback(NfcGenericEvent event, void* context) {
         if(app->last_frame_len) {
             bit_buffer_reset(app->tx);
             bit_buffer_append_bytes(app->tx, app->last_frame, app->last_frame_len);
-            iso14443_3a_listener_send_standard_frame(l, app->tx);
+            spy_tx(app);
         }
         spy_log(app, LogKindRBlock, b, n, NULL, 0);
         return NfcCommandContinue;
