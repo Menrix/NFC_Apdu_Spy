@@ -23,6 +23,7 @@
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync.h>
+#include <nfc/helpers/iso14443_crc.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -528,7 +529,11 @@ static void spy_send(NfcApduSpy* app, Iso14443_3aListener* l, const uint8_t* fra
         memcpy(app->last_frame, frame, len);
         app->last_frame_len = (uint8_t)len;
     }
-    iso14443_3a_listener_send_standard_frame(l, app->tx);
+    // send a standard frame portably (works on official + Momentum):
+    // append CRC-A, then transmit raw — exactly what the Momentum-only helper
+    // iso14443_3a_listener_send_standard_frame() did internally.
+    iso14443_crc_append(Iso14443CrcTypeA, app->tx);
+    iso14443_3a_listener_tx(l, app->tx);
 }
 
 // ---------- ISO-DEP by hand (card side) ----------
