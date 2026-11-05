@@ -30,7 +30,7 @@
 #include "spy_gfx.h"
 
 #define TAG           "NfcApduSpy"
-#define APP_VERSION   "1.0.0"
+#define APP_VERSION   "1.0.2"
 #define SPY_DIR       EXT_PATH("apps_data/nfc_apdu_spy")
 #define TMP_PATH      EXT_PATH("apps_data/nfc_apdu_spy/spy_tmp.txt")
 #define SETTINGS_PATH EXT_PATH("apps_data/nfc_apdu_spy/settings.txt")

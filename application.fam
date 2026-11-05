@@ -7,7 +7,7 @@ App(
     stack_size=8 * 1024,
     fap_category="NFC",
     targets=["f7"],
-    fap_version="1.0.0",
+    fap_version="1.0.2",
     fap_icon="images/nfc_apdu_spy_10px.png",
     fap_description="Emulates an ISO14443-4A badge and logs all APDUs from a phone",
     fap_author="Menrix (Don_Key_Moustache)",
